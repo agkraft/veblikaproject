@@ -9,10 +9,7 @@ const PORT = process.env.PORT || 5000;
 
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "http://localhost:3000",
-    ],
+    origin: ["http://localhost:5173", "http://localhost:3000"],
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
@@ -25,7 +22,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // ── Routes ───────────────────────────────────────────────────
 
-app.use("/api/v1", deploymentRoutes);
+app.use("/api", deploymentRoutes);
 
 app.get("/health", (_req: Request, res: Response) => {
   res.status(200).json({
@@ -77,5 +74,11 @@ const startServer = async () => {
     console.log("");
   });
 };
+
+if (process.env.NODE_ENV === "production") {
+  import("./queue/deploymentWorker")
+    .then(() => console.log("✅ Worker started alongside server"))
+    .catch((err) => console.error("Worker failed to start:", err));
+}
 
 startServer();
